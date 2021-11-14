@@ -157,18 +157,26 @@ class QuadTree():
         squared_max_distance = max_distance**2
         return self.k_nearest(search_point, max_count, squared_max_distance, 0, 0)
 
-    def draw_qt(self, screen, draw_points):
+    def draw_qt(self, screen, colors=None, draw_points=True):
         rectt = [self.boundary.left, self.boundary.top,
                  self.boundary.w, self.boundary.h]
+        # if not colors:
+        #     color = (255, 255, 255)
+        # else:
+        #     print(colors)
+        #     color = random.choice(colors)
+        color = (255, 0, 255)
         pygame.draw.rect(screen, WHITE, rectt, 1)
+
         if self.divided:
-            self.northwest.draw_qt(screen, draw_points)
-            self.northeast.draw_qt(screen, draw_points)
-            self.southwest.draw_qt(screen, draw_points)
-            self.southeast.draw_qt(screen, draw_points)
+            self.northwest.draw_qt(screen, color, draw_points)
+            self.northeast.draw_qt(screen, color, draw_points)
+            self.southwest.draw_qt(screen, color, draw_points)
+            self.southeast.draw_qt(screen, color, draw_points)
+
         if draw_points:
             for p in self.points:
-                pygame.draw.circle(screen, WHITE, [p.x, p.y], 2)
+                pygame.draw.circle(screen, color, [p.x, p.y], 2)
 
 
 def print_childrens(qtree):
@@ -190,6 +198,8 @@ if __name__ == '__main__':
     BLUE = (0,   0, 255)
     GREEN = (0, 255,   0)
     RED = (255,   0,   0)
+
+    colors = [WHITE, BLUE, GREEN, RED]
 
     b_x = 400
     b_y = 300
@@ -218,8 +228,7 @@ if __name__ == '__main__':
             p = Point(x, y)
 
             qtree.insert(p)
-            qtree.draw_qt(screen, False)
+            qtree.draw_qt(screen, colors=colors, draw_points=True)
 
-        
         i += 1
     pygame.quit()
