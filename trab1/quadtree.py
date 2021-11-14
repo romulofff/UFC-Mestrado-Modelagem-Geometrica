@@ -2,8 +2,8 @@ import math
 import random
 from time import sleep
 
-import pygame
 import numpy as np
+import pygame
 
 
 class Point():
@@ -38,9 +38,9 @@ class Rectangle():
 
     def contains(self, point):
         return (
-            self.left <= point.x and 
-            point.x <= self.right and 
-            self.top <= point.y and 
+            self.left <= point.x and
+            point.x <= self.right and
+            self.top <= point.y and
             point.y <= self.bottom
         )
 
@@ -108,11 +108,10 @@ class QuadTree():
         else:
             return []
 
-    def create(self, w, h):
-        DEFAULT_CAPACITY = 4
+    def create(self, w, h, capacity=4):
         bounds = Rectangle(w/2, h/2, w, h)
         # print("BOUNDS", bounds)
-        return QuadTree(bounds, DEFAULT_CAPACITY)
+        return QuadTree(bounds, capacity)
 
     def subdivide(self):
         self.northeast = QuadTree(self.boundary.subdivide('ne'), self.capacity)
@@ -158,17 +157,19 @@ class QuadTree():
         squared_max_distance = max_distance**2
         return self.k_nearest(search_point, max_count, squared_max_distance, 0, 0)
 
-    def draw_qt(self, screen):
+    def draw_qt(self, screen, draw_points):
         rectt = [self.boundary.left, self.boundary.top,
                  self.boundary.w, self.boundary.h]
-        pygame.draw.rect(screen, WHITE, rectt, 2)
+        pygame.draw.rect(screen, WHITE, rectt, 1)
         if self.divided:
-            self.northwest.draw_qt(screen)
-            self.northeast.draw_qt(screen)
-            self.southwest.draw_qt(screen)
-            self.southeast.draw_qt(screen)
-        for p in self.points:
-            pygame.draw.circle(screen, WHITE, [p.x, p.y], 2)
+            self.northwest.draw_qt(screen, draw_points)
+            self.northeast.draw_qt(screen, draw_points)
+            self.southwest.draw_qt(screen, draw_points)
+            self.southeast.draw_qt(screen, draw_points)
+        if draw_points:
+            for p in self.points:
+                pygame.draw.circle(screen, WHITE, [p.x, p.y], 2)
+
 
 def print_childrens(qtree):
     if len(qtree.get_children()) > 0:
@@ -180,7 +181,7 @@ def print_childrens(qtree):
 if __name__ == '__main__':
 
     pygame.init()
-    screen = pygame.display.set_mode((1000, 1000))
+    screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("QuadTree")
     clock = pygame.time.Clock()
 
@@ -191,31 +192,18 @@ if __name__ == '__main__':
     RED = (255,   0,   0)
 
     b_x = 400
-    b_y = 400
+    b_y = 300
     b_w = 600
     b_h = 600
     boundary = Rectangle(b_x, b_y, b_w, b_h)
-    qtree = QuadTree(boundary, 10)
+    qtree = QuadTree(boundary, 5)
     qtree.create(b_w, b_h)
     rng = np.random.default_rng()
 
-    for i in range(500):
-        x = rng.integers(low=200, high=b_x*1.5)
-        y = rng.integers(low=200, high=b_y*1.5)
-        # x = np.random.uniform(0, b_x*1.9)
-        # y = np.random.uniform(0, b_y*1.9)
-        # x = np.random.normal(400)
-        # y = np.random.normal(400)
-        p = Point(x, y)
-        # print(x, y)
-        qtree.insert(p)
-        qtree.draw_qt(screen)
-    
-    print_childrens(qtree)
-    
+    i = 0
     while True:
-        clock.tick(1)
-        qtree.draw_qt(screen)
+        clock.tick(60)
+        # qtree.draw_qt(screen)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -223,5 +211,15 @@ if __name__ == '__main__':
                 pygame.quit()
                 exit()
 
+        if i <= 5000:
+            x = rng.integers(low=0, high=b_w)
+            y = rng.integers(low=0, high=b_h)
 
+            p = Point(x, y)
+
+            qtree.insert(p)
+            qtree.draw_qt(screen, False)
+
+        
+        i += 1
     pygame.quit()
