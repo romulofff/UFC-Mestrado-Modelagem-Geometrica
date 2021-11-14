@@ -210,20 +210,24 @@ if __name__ == '__main__':
     b_w = 600
     b_h = 600
     boundary = Rectangle(b_x, b_y, b_w, b_h)
-    qtree = QuadTree(boundary, 1)
+    qtree = QuadTree(boundary, 5)
     qtree.create(b_w, b_h)
     rng = np.random.default_rng()
 
     i = 0
+    toggle_points = False
     while True:
         clock.tick(60)
-        # qtree.draw_qt(screen)
         pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_t:
+                    screen.fill((0,0,0))
+                    toggle_points = not toggle_points
 
         if i <= 5000:
             x = rng.integers(low=0, high=b_w)
@@ -232,7 +236,6 @@ if __name__ == '__main__':
             p = Point(x, y)
 
             qtree.insert(p)
-            qtree.draw_qt(screen, colors=colors, draw_points=False)
+            qtree.draw_qt(screen, colors=colors, draw_points=toggle_points)
 
         i += 1
-    pygame.quit()
