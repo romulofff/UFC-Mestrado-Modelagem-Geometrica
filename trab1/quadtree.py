@@ -108,7 +108,9 @@ class QuadTree():
         else:
             return []
 
-    def create(self, w, h, capacity=4):
+    def create(self, w, h, capacity=None):
+        if not capacity:
+            capacity = self.capacity
         bounds = Rectangle(w/2, h/2, w, h)
         # print("BOUNDS", bounds)
         return QuadTree(bounds, capacity)
@@ -188,8 +190,10 @@ def print_childrens(qtree):
 
 if __name__ == '__main__':
 
+    screen_w = 800
+    screen_h = 600
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((screen_w, screen_h))
     pygame.display.set_caption("QuadTree")
     clock = pygame.time.Clock()
 
@@ -201,12 +205,12 @@ if __name__ == '__main__':
 
     colors = [WHITE, BLUE, GREEN, RED]
 
-    b_x = 400
-    b_y = 300
+    b_x = screen_w/2
+    b_y = screen_h/2
     b_w = 600
     b_h = 600
     boundary = Rectangle(b_x, b_y, b_w, b_h)
-    qtree = QuadTree(boundary, 5)
+    qtree = QuadTree(boundary, 1)
     qtree.create(b_w, b_h)
     rng = np.random.default_rng()
 
@@ -228,7 +232,7 @@ if __name__ == '__main__':
             p = Point(x, y)
 
             qtree.insert(p)
-            qtree.draw_qt(screen, colors=colors, draw_points=True)
+            qtree.draw_qt(screen, colors=colors, draw_points=False)
 
         i += 1
     pygame.quit()
