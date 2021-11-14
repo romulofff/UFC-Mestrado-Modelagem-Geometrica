@@ -190,8 +190,8 @@ def print_childrens(qtree):
 
 if __name__ == '__main__':
 
-    screen_w = 800
-    screen_h = 600
+    screen_w = 1080
+    screen_h = 720
     pygame.init()
     screen = pygame.display.set_mode((screen_w, screen_h))
     pygame.display.set_caption("QuadTree")
@@ -207,8 +207,8 @@ if __name__ == '__main__':
 
     b_x = screen_w/2
     b_y = screen_h/2
-    b_w = 600
-    b_h = 600
+    b_w = screen_w
+    b_h = screen_h
     boundary = Rectangle(b_x, b_y, b_w, b_h)
     qtree = QuadTree(boundary, 5)
     qtree.create(b_w, b_h)
@@ -237,5 +237,6 @@ if __name__ == '__main__':
 
             qtree.insert(p)
             qtree.draw_qt(screen, colors=colors, draw_points=toggle_points)
-
+        elif i == 5001:
+            print("Finished.")
         i += 1
