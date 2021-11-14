@@ -50,11 +50,11 @@ class Rectangle():
     def subdivide(self, quadrant):
         if quadrant == 'ne':
             return Rectangle(self.x + self.w / 4, self.y - self.h / 4, self.w / 2, self.h / 2)
-        elif 'nw':
+        elif quadrant == 'nw':
             return Rectangle(self.x - self.w / 4, self.y - self.h / 4, self.w / 2, self.h / 2)
-        elif 'se':
+        elif quadrant == 'se':
             return Rectangle(self.x + self.w / 4, self.y + self.h / 4, self.w / 2, self.h / 2)
-        elif 'sw':
+        elif quadrant == 'sw':
             return Rectangle(self.x - self.w / 4, self.y + self.h / 4, self.w / 2, self.h / 2)
 
 
@@ -218,6 +218,10 @@ if __name__ == '__main__':
         qtree.draw_qt(screen)
         pygame.display.flip()
 
-        # sleep(5)
-        # break
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+
     pygame.quit()
