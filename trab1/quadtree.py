@@ -5,6 +5,8 @@ from time import sleep
 import numpy as np
 import pygame
 
+color_idx = 0
+
 
 class Point():
 
@@ -103,6 +105,9 @@ class QuadTree():
         CYAN = (0, 255, 255)
         self.colors = [WHITE, BLUE, GREEN, RED, YELLOW, PINK, CYAN]
 
+        global color_idx
+        self.color_idx = color_idx
+
         self.boundary = boundary
         self.capacity = capacity
         self.points = []
@@ -119,14 +124,9 @@ class QuadTree():
         else:
             return []
 
-    def create(self, w, h, capacity=None):
-        if not capacity:
-            capacity = self.capacity
-        bounds = Rectangle(w/2, h/2, w, h)
-        # print("BOUNDS", bounds)
-        return QuadTree(bounds, capacity)
-
     def subdivide(self):
+        global color_idx
+        color_idx += 1
         self.northeast = QuadTree(self.boundary.subdivide('ne'), self.capacity)
         self.northwest = QuadTree(self.boundary.subdivide('nw'), self.capacity)
         self.southeast = QuadTree(self.boundary.subdivide('se'), self.capacity)
@@ -174,7 +174,8 @@ class QuadTree():
         rectt = [self.boundary.left, self.boundary.top,
                  self.boundary.w, self.boundary.h]
 
-        color = random.choice(self.colors)
+        # color = random.choice(self.colors)
+        color = self.colors[self.color_idx % len(self.colors)]
         if draw_tree:
             pygame.draw.rect(screen, color, rectt, 1)
 
@@ -212,11 +213,10 @@ if __name__ == '__main__':
     boundary = Rectangle(b_x, b_y, b_w, b_h)
     capacity = 5
     qtree = QuadTree(boundary, capacity)
-    qtree.create(b_w, b_h)
     rng = np.random.default_rng()
 
     i = 0
-    n_points = 5000
+    n_points = 500
     toggle_points = True
     toggle_tree = True
     while True:
