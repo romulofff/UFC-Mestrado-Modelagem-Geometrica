@@ -92,6 +92,17 @@ class Circle():
 class QuadTree():
 
     def __init__(self, boundary, capacity) -> None:
+
+        BLACK = (0,   0,   0)
+        WHITE = (255, 255, 255)
+        BLUE = (0,   0, 255)
+        GREEN = (0, 255,   0)
+        RED = (255,   0,   0)
+        YELLOW = (255, 255, 0)
+        PINK = (255, 0, 255)
+        CYAN = (0, 255, 255)
+        self.colors = [WHITE, BLUE, GREEN, RED, YELLOW, PINK, CYAN]
+
         self.boundary = boundary
         self.capacity = capacity
         self.points = []
@@ -159,23 +170,19 @@ class QuadTree():
         squared_max_distance = max_distance**2
         return self.k_nearest(search_point, max_count, squared_max_distance, 0, 0)
 
-    def draw_qt(self, screen, colors=None, draw_tree=True, draw_points=True):
+    def draw_qt(self, screen, draw_tree=True, draw_points=True):
         rectt = [self.boundary.left, self.boundary.top,
                  self.boundary.w, self.boundary.h]
-        # if not colors:
-        #     color = (255, 255, 255)
-        # else:
-        #     print(colors)
-        #     color = random.choice(colors)
-        color = (255, 0, 255)
+
+        color = random.choice(self.colors)
         if draw_tree:
-            pygame.draw.rect(screen, WHITE, rectt, 1)
+            pygame.draw.rect(screen, color, rectt, 1)
 
         if self.divided:
-            self.northwest.draw_qt(screen, color, draw_tree, draw_points)
-            self.northeast.draw_qt(screen, color, draw_tree, draw_points)
-            self.southwest.draw_qt(screen, color, draw_tree, draw_points)
-            self.southeast.draw_qt(screen, color, draw_tree, draw_points)
+            self.northwest.draw_qt(screen, draw_tree, draw_points)
+            self.northeast.draw_qt(screen, draw_tree, draw_points)
+            self.southwest.draw_qt(screen, draw_tree, draw_points)
+            self.southeast.draw_qt(screen, draw_tree, draw_points)
 
         if draw_points:
             for p in self.points:
@@ -197,14 +204,6 @@ if __name__ == '__main__':
     pygame.display.set_caption("QuadTree")
     screen = pygame.display.set_mode((screen_w, screen_h))
     clock = pygame.time.Clock()
-
-    BLACK = (0,   0,   0)
-    WHITE = (255, 255, 255)
-    BLUE = (0,   0, 255)
-    GREEN = (0, 255,   0)
-    RED = (255,   0,   0)
-
-    colors = [WHITE, BLUE, GREEN, RED]
 
     b_x = screen_w/2
     b_y = screen_h/2
@@ -245,8 +244,8 @@ if __name__ == '__main__':
             p = Point(x, y)
 
             qtree.insert(p)
-            qtree.draw_qt(screen, colors=colors,
-                          draw_tree=toggle_tree, draw_points=toggle_points)
+            qtree.draw_qt(screen, draw_tree=toggle_tree,
+                          draw_points=toggle_points)
         elif i == n_points+1:
             print("Finished.")
         i += 1
