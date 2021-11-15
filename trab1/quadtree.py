@@ -159,7 +159,7 @@ class QuadTree():
         squared_max_distance = max_distance**2
         return self.k_nearest(search_point, max_count, squared_max_distance, 0, 0)
 
-    def draw_qt(self, screen, colors=None, draw_points=True):
+    def draw_qt(self, screen, colors=None, draw_tree=True, draw_points=True):
         rectt = [self.boundary.left, self.boundary.top,
                  self.boundary.w, self.boundary.h]
         # if not colors:
@@ -168,13 +168,14 @@ class QuadTree():
         #     print(colors)
         #     color = random.choice(colors)
         color = (255, 0, 255)
-        pygame.draw.rect(screen, WHITE, rectt, 1)
+        if draw_tree:
+            pygame.draw.rect(screen, WHITE, rectt, 1)
 
         if self.divided:
-            self.northwest.draw_qt(screen, color, draw_points)
-            self.northeast.draw_qt(screen, color, draw_points)
-            self.southwest.draw_qt(screen, color, draw_points)
-            self.southeast.draw_qt(screen, color, draw_points)
+            self.northwest.draw_qt(screen, color, draw_tree, draw_points)
+            self.northeast.draw_qt(screen, color, draw_tree, draw_points)
+            self.southwest.draw_qt(screen, color, draw_tree, draw_points)
+            self.southeast.draw_qt(screen, color, draw_tree, draw_points)
 
         if draw_points:
             for p in self.points:
@@ -193,8 +194,8 @@ if __name__ == '__main__':
     screen_w = 1080
     screen_h = 720
     pygame.init()
-    screen = pygame.display.set_mode((screen_w, screen_h))
     pygame.display.set_caption("QuadTree")
+    screen = pygame.display.set_mode((screen_w, screen_h))
     clock = pygame.time.Clock()
 
     BLACK = (0,   0,   0)
@@ -210,12 +211,15 @@ if __name__ == '__main__':
     b_w = screen_w
     b_h = screen_h
     boundary = Rectangle(b_x, b_y, b_w, b_h)
-    qtree = QuadTree(boundary, 5)
+    capacity = 5
+    qtree = QuadTree(boundary, capacity)
     qtree.create(b_w, b_h)
     rng = np.random.default_rng()
 
     i = 0
-    toggle_points = False
+    n_points = 5000
+    toggle_points = True
+    toggle_tree = True
     while True:
         clock.tick(60)
         pygame.display.flip()
@@ -225,18 +229,24 @@ if __name__ == '__main__':
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_t:
-                    screen.fill((0,0,0))
+                if event.key == pygame.K_p:
+                    screen.fill((0, 0, 0))
                     toggle_points = not toggle_points
+                if event.key == pygame.K_t:
+                    screen.fill((0, 0, 0))
+                    toggle_tree = not toggle_tree
+                if i > n_points:
+                    qtree.draw_qt(screen, colors=colors,
+                                  draw_points=toggle_points)
 
-        if i <= 5000:
+        if i <= n_points:
             x = rng.integers(low=0, high=b_w)
             y = rng.integers(low=0, high=b_h)
-
             p = Point(x, y)
 
             qtree.insert(p)
-            qtree.draw_qt(screen, colors=colors, draw_points=toggle_points)
-        elif i == 5001:
+            qtree.draw_qt(screen, colors=colors,
+                          draw_tree=toggle_tree, draw_points=toggle_points)
+        elif i == n_points+1:
             print("Finished.")
         i += 1
