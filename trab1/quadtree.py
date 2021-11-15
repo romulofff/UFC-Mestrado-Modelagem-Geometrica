@@ -190,6 +190,50 @@ class QuadTree():
                 pygame.draw.circle(screen, color, [p.x, p.y], 2)
 
 
+def _check_input(qtree, toggle_points, toggle_tree, n_points, i):
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                screen.fill((0, 0, 0))
+                toggle_points = not toggle_points
+            if event.key == pygame.K_t:
+                screen.fill((0, 0, 0))
+                toggle_tree = not toggle_tree
+            if i > n_points:
+                qtree.draw_qt(screen,
+                              draw_points=toggle_points)
+
+    return toggle_points, toggle_tree
+
+
+def run_quadtree(qtree, toggle_points, toggle_tree, n_points):
+    i = 0
+    rng = np.random.default_rng()
+
+    while True:
+        clock.tick(60)
+        pygame.display.flip()
+
+        toggle_points, toggle_tree = _check_input(
+            qtree, toggle_points, toggle_tree, n_points, i)
+
+        if i <= n_points:
+            x = rng.integers(low=0, high=b_w)
+            y = rng.integers(low=0, high=b_h)
+            p = Point(x, y)
+
+            qtree.insert(p)
+            qtree.draw_qt(screen,
+                          draw_tree=toggle_tree, draw_points=toggle_points)
+        elif i == n_points+1:
+            print("Finished.")
+            pygame.display.set_caption("QuadTree - FINISHED!")
+        i += 1
+
+
 def print_childrens(qtree):
     if len(qtree.get_children()) > 0:
         for child in qtree.get_children():
@@ -219,33 +263,5 @@ if __name__ == '__main__':
     n_points = 500
     toggle_points = True
     toggle_tree = True
-    while True:
-        clock.tick(60)
-        pygame.display.flip()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    screen.fill((0, 0, 0))
-                    toggle_points = not toggle_points
-                if event.key == pygame.K_t:
-                    screen.fill((0, 0, 0))
-                    toggle_tree = not toggle_tree
-                if i > n_points:
-                    qtree.draw_qt(screen, colors=colors,
-                                  draw_points=toggle_points)
-
-        if i <= n_points:
-            x = rng.integers(low=0, high=b_w)
-            y = rng.integers(low=0, high=b_h)
-            p = Point(x, y)
-
-            qtree.insert(p)
-            qtree.draw_qt(screen, draw_tree=toggle_tree,
-                          draw_points=toggle_points)
-        elif i == n_points+1:
-            print("Finished.")
-        i += 1
+    run_quadtree(qtree, toggle_points, toggle_tree, n_points)
