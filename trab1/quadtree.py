@@ -204,12 +204,12 @@ def _check_input(qtree, toggle_points, toggle_tree, n_points, i):
                 toggle_tree = not toggle_tree
             if i > n_points:
                 qtree.draw_qt(screen,
-                              draw_points=toggle_points)
+                              draw_points=toggle_points, draw_tree=toggle_tree)
 
     return toggle_points, toggle_tree
 
 
-def run_quadtree(qtree, toggle_points, toggle_tree, n_points):
+def run_random_quadtree(qtree, toggle_points, toggle_tree, n_points):
     i = 0
     rng = np.random.default_rng()
 
@@ -234,11 +234,44 @@ def run_quadtree(qtree, toggle_points, toggle_tree, n_points):
         i += 1
 
 
+def run_quadtree(qtree, toggle_points, toggle_tree, points):
+    i = 0
+    n_points = len(points)
+
+    while True:
+        clock.tick(60)
+        pygame.display.flip()
+
+        toggle_points, toggle_tree = _check_input(
+            qtree, toggle_points, toggle_tree, n_points, i)
+
+        if i < n_points:
+            print(i)
+            qtree.insert(points[i])
+            qtree.draw_qt(screen, toggle_tree, toggle_points)
+
+        if i == n_points+1:
+            print("Finished.")
+            pygame.display.set_caption("QuadTree - FINISHED!")
+        i += 1
+
+
 def print_childrens(qtree):
     if len(qtree.get_children()) > 0:
         for child in qtree.get_children():
             print_childrens(child)
     print(len(qtree.points))
+
+
+def read_obj(file) -> list:
+    points = []
+    for line in file.readlines():
+        if line[0] == 'v':
+            split_line = line.split()
+            x = float(split_line[1])*250
+            y = float(split_line[2])*250
+            points.append(Point(x, y))
+    return points
 
 
 if __name__ == '__main__':
@@ -255,7 +288,7 @@ if __name__ == '__main__':
     b_w = screen_w
     b_h = screen_h
     boundary = Rectangle(b_x, b_y, b_w, b_h)
-    capacity = 5
+    capacity = 1
     qtree = QuadTree(boundary, capacity)
     rng = np.random.default_rng()
 
@@ -264,4 +297,10 @@ if __name__ == '__main__':
     toggle_points = True
     toggle_tree = True
 
-    run_quadtree(qtree, toggle_points, toggle_tree, n_points)
+    # run_random_quadtree(qtree, toggle_points, toggle_tree, n_points)
+
+    with open("sphere.obj", 'r') as f:
+        # with open("semi-circle.obj", 'r') as f:
+        points = read_obj(f)
+
+    run_quadtree(qtree, toggle_points, toggle_tree, points)
