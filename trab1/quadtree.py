@@ -179,7 +179,11 @@ class QuadTree():
                  self.boundary.w, self.boundary.h]
 
         # Define color of the boundary
-        color = self.colors[self.color_idx % len(self.colors)]
+        # color = self.colors[self.color_idx % len(self.colors)]
+        try: 
+            color = self.color
+        except:
+            color = self.colors[0]
         if draw_tree:
             pygame.draw.rect(screen, color, rectt, 1)
 
@@ -194,6 +198,18 @@ class QuadTree():
                 # Define color of the points
                 pygame.draw.circle(screen, color, [p.x, p.y], 2)
 
+    def classify(self):
+        children = self.get_children()
+        if len(children) > 0:
+            for child in children:
+                child.classify()
+        else:
+            if len(self.points) > 0:
+                self.color = (0, 255,   0)
+                self.type = "in"
+            else:
+                self.color = (255, 0, 0)
+                self.type = "out"
 
 def _check_input(qtree, toggle_points, toggle_tree, n_points, i):
     for event in pygame.event.get():
@@ -219,7 +235,6 @@ def run_random_quadtree(qtree, toggle_points, toggle_tree, n_points):
     rng = np.random.default_rng()
 
     while True:
-        # _ = input()
         clock.tick(60)
         pygame.display.flip()
 
@@ -235,6 +250,9 @@ def run_random_quadtree(qtree, toggle_points, toggle_tree, n_points):
             qtree.draw_qt(screen,
                           draw_tree=toggle_tree, draw_points=toggle_points)
         elif i == n_points+1:
+            qtree.classify()
+            qtree.draw_qt(screen,
+                          draw_tree=toggle_tree, draw_points=toggle_points)
             print("Finished.")
             pygame.display.set_caption("QuadTree - FINISHED!")
         i += 1
@@ -256,6 +274,8 @@ def run_quadtree(qtree, toggle_points, toggle_tree, points):
             qtree.draw_qt(screen, toggle_tree, toggle_points)
 
         if i == n_points+1:
+            qtree.classify()
+
             print("Finished.")
             pygame.display.set_caption("QuadTree - FINISHED!")
         i += 1
