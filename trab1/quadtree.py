@@ -1,3 +1,4 @@
+import sys
 import math
 import random
 from time import sleep
@@ -5,8 +6,10 @@ from time import sleep
 import numpy as np
 import pygame
 
+print(sys.getrecursionlimit())
+# sys.setrecursionlimit(5000)
+print(sys.getrecursionlimit())
 color_idx = 0
-
 
 class Point():
 
@@ -293,8 +296,8 @@ def read_obj(file) -> list:
     for line in file.readlines():
         if line[0] == 'v':
             split_line = line.split()
-            x = float(split_line[1])*250
-            y = float(split_line[2])*250
+            x = float(split_line[1])*200
+            y = float(split_line[2])*200
             points.append(Point(x, y))
     return points
 
@@ -313,7 +316,7 @@ if __name__ == '__main__':
     b_w = screen_w
     b_h = screen_h
     boundary = Rectangle(b_x, b_y, b_w, b_h)
-    capacity = 2
+    capacity = 4
     qtree = QuadTree(boundary, capacity)
     rng = np.random.default_rng()
 
@@ -326,6 +329,15 @@ if __name__ == '__main__':
     if len(filename) > 0:
         with open(filename, 'r') as f:
             points = read_obj(f)
-        run_quadtree(qtree, toggle_points, toggle_tree, points)
+            print(len(points))
+            # for point in points: print(point.x, point.y)
+        try:
+            run_quadtree(qtree, toggle_points, toggle_tree, points)
+        except RecursionError:
+            capacity += 1
+            qtree = QuadTree(boundary, capacity)
+            screen.fill((0, 0, 0))
+            run_quadtree(qtree, toggle_points, toggle_tree, points)
+
     else:
         run_random_quadtree(qtree, toggle_points, toggle_tree, n_points)
