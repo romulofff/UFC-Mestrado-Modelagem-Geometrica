@@ -300,7 +300,7 @@ if __name__ == '__main__':
 
     filename = input("Filename: ")
     if len(filename) > 0:
-        with open(filename, 'r') as f:
+        with open("obj/"+filename, 'r') as f:
             points = read_obj(f)
             print(len(points))
             # for point in points: print(point.x, point.y)
