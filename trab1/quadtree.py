@@ -1,15 +1,8 @@
-import sys
 import math
-import random
-from time import sleep
 
 import numpy as np
 import pygame
 
-print(sys.getrecursionlimit())
-# sys.setrecursionlimit(5000)
-print(sys.getrecursionlimit())
-color_idx = 0
 
 class Point():
 
@@ -98,19 +91,7 @@ class QuadTree():
 
     def __init__(self, boundary, capacity) -> None:
 
-        BLACK = (0,   0,   0)
-        WHITE = (255, 255, 255)
-        BLUE = (0,   0, 255)
-        GREEN = (0, 255,   0)
-        RED = (255,   0,   0)
-        YELLOW = (255, 255, 0)
-        PINK = (255, 0, 255)
-        CYAN = (0, 255, 255)
-        self.colors = [WHITE, BLUE, GREEN, RED, YELLOW, PINK, CYAN]
-
-        global color_idx
-        self.color_idx = color_idx
-
+        self.color = (255, 255, 255)
         self.boundary = boundary
         self.capacity = capacity
         self.points = []
@@ -128,8 +109,6 @@ class QuadTree():
             return []
 
     def subdivide(self):
-        global color_idx
-        color_idx += 1
         self.northeast = QuadTree(self.boundary.subdivide('ne'), self.capacity)
         self.northwest = QuadTree(self.boundary.subdivide('nw'), self.capacity)
         self.southeast = QuadTree(self.boundary.subdivide('se'), self.capacity)
@@ -182,11 +161,7 @@ class QuadTree():
                  self.boundary.w, self.boundary.h]
 
         # Define color of the boundary
-        # color = self.colors[self.color_idx % len(self.colors)]
-        try: 
-            color = self.color
-        except:
-            color = self.colors[0]
+        color = self.color
         if draw_tree:
             pygame.draw.rect(screen, color, rectt, 1)
 
@@ -214,6 +189,7 @@ class QuadTree():
                 self.color = (255, 0, 0)
                 self.type = "out"
 
+
 def _check_input(qtree, toggle_points, toggle_tree, n_points, i):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -227,9 +203,8 @@ def _check_input(qtree, toggle_points, toggle_tree, n_points, i):
                 screen.fill((0, 0, 0))
                 toggle_tree = not toggle_tree
             if i > n_points:
-                qtree.draw_qt(screen,
-                              draw_points=toggle_points, draw_tree=toggle_tree)
-
+                screen.fill((0, 0, 0))
+                qtree.draw_qt(screen, toggle_tree, toggle_points)
     return toggle_points, toggle_tree
 
 
@@ -250,12 +225,10 @@ def run_random_quadtree(qtree, toggle_points, toggle_tree, n_points):
             p = Point(x, y)
 
             qtree.insert(p)
-            qtree.draw_qt(screen,
-                          draw_tree=toggle_tree, draw_points=toggle_points)
+            qtree.draw_qt(screen, toggle_tree, toggle_points)
         elif i == n_points+1:
             qtree.classify()
-            qtree.draw_qt(screen,
-                          draw_tree=toggle_tree, draw_points=toggle_points)
+            qtree.draw_qt(screen, toggle_tree, toggle_points)
             print("Finished.")
             pygame.display.set_caption("QuadTree - FINISHED!")
         i += 1
@@ -264,7 +237,6 @@ def run_random_quadtree(qtree, toggle_points, toggle_tree, n_points):
 def run_quadtree(qtree, toggle_points, toggle_tree, points):
     i = 0
     n_points = len(points)
-
     while True:
         clock.tick(60)
         pygame.display.flip()
@@ -278,7 +250,7 @@ def run_quadtree(qtree, toggle_points, toggle_tree, points):
 
         if i == n_points+1:
             qtree.classify()
-
+            qtree.draw_qt(screen, toggle_tree, toggle_points)
             print("Finished.")
             pygame.display.set_caption("QuadTree - FINISHED!")
         i += 1
@@ -305,7 +277,9 @@ def read_obj(file) -> list:
 if __name__ == '__main__':
 
     screen_w = 1080
-    screen_h = 720
+    screen_w = 1920
+    screen_h = 1080
+    # screen_h = 720
     pygame.init()
     pygame.display.set_caption("QuadTree")
     screen = pygame.display.set_mode((screen_w, screen_h))
@@ -318,10 +292,9 @@ if __name__ == '__main__':
     boundary = Rectangle(b_x, b_y, b_w, b_h)
     capacity = 4
     qtree = QuadTree(boundary, capacity)
-    rng = np.random.default_rng()
 
     i = 0
-    n_points = 500
+    n_points = 1000
     toggle_points = True
     toggle_tree = True
 
@@ -331,13 +304,14 @@ if __name__ == '__main__':
             points = read_obj(f)
             print(len(points))
             # for point in points: print(point.x, point.y)
-        try:
-            run_quadtree(qtree, toggle_points, toggle_tree, points)
-        except RecursionError:
-            capacity += 1
-            qtree = QuadTree(boundary, capacity)
-            screen.fill((0, 0, 0))
-            run_quadtree(qtree, toggle_points, toggle_tree, points)
-
+        while True:
+            try:
+                run_quadtree(qtree, toggle_points, toggle_tree, points)
+            except RecursionError:
+                print("Recursion Error. Increasing Quad Tree capacity from {} to {}.".format(
+                    capacity, capacity+1))
+                capacity += 1
+                qtree = QuadTree(boundary, capacity)
+                screen.fill((0, 0, 0))
     else:
         run_random_quadtree(qtree, toggle_points, toggle_tree, n_points)
