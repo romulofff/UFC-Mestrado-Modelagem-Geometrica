@@ -133,17 +133,21 @@ class QuadTree():
         self.southwest = QuadTree(self.boundary.subdivide('sw'), self.capacity)
 
         self.divided = True
+        # Remove points from parent and transfer to children
+        for p in self.points:
+            self.insert(p)
+        self.points = []
 
     def insert(self, point):
         if not self.boundary.contains(point):
             return False
-        # print(len(self.points))
-        if len(self.points) < self.capacity:
-            self.points.append(point)
-            return True
 
         if not self.divided:
-            self.subdivide()
+            if len(self.points) < self.capacity:
+                self.points.append(point)
+                return True
+            else:
+                self.subdivide()
 
         return self.northeast.insert(point) or self.northwest.insert(point) or self.southeast.insert(point) or self.southwest.insert(point)
 
@@ -174,7 +178,7 @@ class QuadTree():
         rectt = [self.boundary.left, self.boundary.top,
                  self.boundary.w, self.boundary.h]
 
-        # color = random.choice(self.colors)
+        # Define color of the boundary
         color = self.colors[self.color_idx % len(self.colors)]
         if draw_tree:
             pygame.draw.rect(screen, color, rectt, 1)
@@ -187,6 +191,7 @@ class QuadTree():
 
         if draw_points:
             for p in self.points:
+                # Define color of the points
                 pygame.draw.circle(screen, color, [p.x, p.y], 2)
 
 
@@ -214,6 +219,7 @@ def run_random_quadtree(qtree, toggle_points, toggle_tree, n_points):
     rng = np.random.default_rng()
 
     while True:
+        # _ = input()
         clock.tick(60)
         pygame.display.flip()
 
@@ -246,7 +252,6 @@ def run_quadtree(qtree, toggle_points, toggle_tree, points):
             qtree, toggle_points, toggle_tree, n_points, i)
 
         if i < n_points:
-            print(i)
             qtree.insert(points[i])
             qtree.draw_qt(screen, toggle_tree, toggle_points)
 
@@ -288,7 +293,7 @@ if __name__ == '__main__':
     b_w = screen_w
     b_h = screen_h
     boundary = Rectangle(b_x, b_y, b_w, b_h)
-    capacity = 1
+    capacity = 2
     qtree = QuadTree(boundary, capacity)
     rng = np.random.default_rng()
 
@@ -297,10 +302,10 @@ if __name__ == '__main__':
     toggle_points = True
     toggle_tree = True
 
-    # run_random_quadtree(qtree, toggle_points, toggle_tree, n_points)
-
-    with open("sphere.obj", 'r') as f:
-        # with open("semi-circle.obj", 'r') as f:
-        points = read_obj(f)
-
-    run_quadtree(qtree, toggle_points, toggle_tree, points)
+    filename = input("Filename: ")
+    if len(filename) > 0:
+        with open(filename, 'r') as f:
+            points = read_obj(f)
+        run_quadtree(qtree, toggle_points, toggle_tree, points)
+    else:
+        run_random_quadtree(qtree, toggle_points, toggle_tree, n_points)
