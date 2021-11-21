@@ -303,6 +303,7 @@ if __name__ == '__main__':
         with open("obj/"+filename, 'r') as f:
             points = read_obj(f)
             print(len(points))
+            if len(points) > 2000 : capacity = 10
             # for point in points: print(point.x, point.y)
         while True:
             try:
